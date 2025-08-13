@@ -6,7 +6,10 @@
 #include "CConnectSocket.h"
 #include "CNickNameDlg.h"
 #include <map>
-
+#include <mutex>
+#include <queue>
+#include <thread>
+#include <atomic>
 // CChatClientDlg 대화 상자
 class CChatClientDlg : public CDialogEx
 {
@@ -40,10 +43,26 @@ protected:
 public:
 	CListBox m_List;
 	afx_msg void OnBnClickedButton1();
+	
 	CButton m_Edit;
 	CString m_strMessage;
 	CString m_NickName;
 	afx_msg void OnBnClickedButton2();
 	afx_msg void OnListDblClk();
 	std::map<int, CString> m_FileDownloadMap;
+
+	std::queue<std::vector<BYTE>> m_recvQueue;   // 데이터 저장용 큐
+	std::mutex m_queueMutex;                     // 큐 락
+	std::condition_variable m_cv;                // 스레드 알림용
+	std::thread m_workerThread;                  // 워커스레드 객체
+	std::atomic<bool> m_bThreadRun = false;
+	CString m_FilePath;//보낼파일의 경로
+	void StartWorkerThread();
+	afx_msg LRESULT OnChatMessage(WPARAM wParam, LPARAM lParam);
+	void HandleReceivedFileInWorker(std::vector<BYTE>& firstChunk);
+	afx_msg LRESULT OnFileSendDone(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnFileSendError(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnFileSendProgress(WPARAM wParam, LPARAM lParam);
+	HANDLE m_sendThreadHandle = NULL;             // 전송 스레드 핸들 (종료 대기용)
+	uint32_t m_ClientID;
 };

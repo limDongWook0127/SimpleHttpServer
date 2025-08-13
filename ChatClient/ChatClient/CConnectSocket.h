@@ -9,8 +9,7 @@ public:
     virtual void OnReceive(int nErrorCode);
     int  SendAll(const void* buf, int len);
     int  RecvAll(void* buf, int len);   
-    void SendFile(LPCTSTR lpszFilePath);
-    bool IsFileHeader(BYTE* buffer, int nLen);
-    void HandleReceivedFile(BYTE* buffer, int nLen);
+    static bool IsFileHeader(BYTE* buffer, int nLen);
+    //void HandleReceivedFile(BYTE* buffer, int nLen);
 };
 

@@ -14,6 +14,9 @@
 #define IDC_EDIT1                       1002
 #define IDC_BUTTON1                     1003
 #define IDC_BUTTON2                     1004
+#define WM_FILE_SEND_DONE     (WM_USER + 101) 
+#define WM_FILE_SEND_ERROR    (WM_USER + 102)
+#define WM_FILE_SEND_PROGRESS (WM_USER + 205)
 
 // Next default values for new objects
 // 

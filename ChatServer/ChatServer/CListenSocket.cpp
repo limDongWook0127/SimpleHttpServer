@@ -81,14 +81,15 @@ void CListenSocket::SendChatDataAll(TCHAR* pszMessage)
 	}
 }
 
-void CListenSocket::SendBinaryToAll(const void* buf, int len)
+void CListenSocket::SendBinaryToAll(const void* buf, int len, CClientSocket* pExcept)
 {
 	POSITION pos = m_ptrClientSocketList.GetHeadPosition();
 	while (pos)
 	{
 		CClientSocket* pClient = (CClientSocket*)m_ptrClientSocketList.GetNext(pos);
 		if (!pClient) continue;
-
+		if (pExcept && pClient == pExcept)
+			continue;
 		if (pClient->SendAll(buf, len) == SOCKET_ERROR)
 			CloseClientSokcet(pClient);
 	}

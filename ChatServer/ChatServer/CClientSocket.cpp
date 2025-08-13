@@ -167,19 +167,25 @@ void CClientSocket::HandleFileTransfer(BYTE* buffer, int nLen)
 
 	// 2) 로그
 	CString msg;
-	msg.Format(L"[파일 수신] %S (%u bytes)", header.fileName, header.fileSize);
+
+	// UTF-8 → CString (Unicode) 변환
+	CString fileNameW(CA2W(header.fileName, CP_UTF8));
+
+	// 포맷 문자열은 %s (유니코드 CString용)
+	msg.Format(L"[파일 수신] %s (%u bytes)", fileNameW.GetString(), header.fileSize);
+
 	CChatServerDlg* pMain = (CChatServerDlg*)AfxGetMainWnd();
 	pMain->m_List.AddString(msg);
 
 	// 3) 헤더 브로드캐스트
 	auto* pServerSocket = (CListenSocket*)m_pListenSocket;
-	pServerSocket->SendBinaryToAll(&header, sizeof(header));
+	pServerSocket->SendBinaryToAll(&header, sizeof(header),this);
 
 	// 4) 첫 chunk 브로드캐스트
 	int firstChunk = min(nLen, (int)header.fileSize);
 	//이번 Receive()로 이미 들어온 본문 크기(nLen)와 전체 파일 크기(header.fileSize) 중 작은 값만큼을 첫 번째로 보낼 덩어리 크기로 정함.
 	if (firstChunk > 0 && buffer)
-		pServerSocket->SendBinaryToAll(buffer, firstChunk);
+		pServerSocket->SendBinaryToAll(buffer, firstChunk,this);
 	//첫 덩어리 크기가 0보다 크고, buffer가 유효하면
 	//그 부분을 바로 모든 클라이언트에게 브로드캐스트.
 
@@ -196,7 +202,7 @@ void CClientSocket::HandleFileTransfer(BYTE* buffer, int nLen)
 			AfxMessageBox(L"서버: 파일 수신 중단/오류");
 			return;
 		}
-		pServerSocket->SendBinaryToAll(tmp.data(), r);
+		pServerSocket->SendBinaryToAll(tmp.data(), r,this);
 		remain -= r;
 	}
 }

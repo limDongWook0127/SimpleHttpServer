@@ -1,5 +1,6 @@
 #pragma once
 #include <afxsock.h>
+class CClientSocket;
 class CListenSocket :
     public CAsyncSocket
 {
@@ -11,8 +12,7 @@ public:
     virtual void OnAccept(int nErrorCode);
     void CloseClientSokcet(CSocket* pClient);
     void SendChatDataAll(TCHAR* pszMessage);
-    int SendAll(CSocket* s, const void* buf, int len);
-    void SendBinaryToAll(const void* buf, int len);
+    void SendBinaryToAll(const void* buf, int len, CClientSocket* pExcept);
    
 };
 
